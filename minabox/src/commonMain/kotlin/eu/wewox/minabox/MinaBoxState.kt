@@ -3,11 +3,18 @@ package eu.wewox.minabox
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.annotation.FrequentlyChangingValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -92,9 +99,10 @@ public class MinaBoxState(
      *
      * The value changes on every scroll, so reading it directly during composition causes frequent recompositions. That
      * is why it is annotated with [FrequentlyChangingValue] and why lint warns for such reads. Instead, consider:
-     * - [derivedStateOf] to recompose only when a derived value changes, for example when the first visible item
-     *   changes rather than on every pixel scrolled.
-     * - [snapshotFlow] to collect the changes as a flow, for example inside a [LaunchedEffect].
+     * - [androidx.compose.runtime.derivedStateOf] to recompose only when a derived value changes, for example when the
+     *   first visible item changes rather than on every pixel scrolled.
+     * - [snapshotFlow] to collect the changes as a flow, for example inside a
+     *   [androidx.compose.runtime.LaunchedEffect].
      * - reading it from a measure, layout or draw block, which invalidates only that phase instead of causing a
      *   recomposition.
      *
@@ -355,8 +363,8 @@ public class MinaBoxState(
      *
      * @property x Offset on the X axis in pixels.
      * @property y Offset on the Y axis in pixels.
-     * @property maxX The max offset on on the X axis in pixels.
-     * @property maxY The max offset on on the Y axis in pixels.
+     * @property maxX The max offset on the X axis in pixels.
+     * @property maxY The max offset on the Y axis in pixels.
      * @property viewportWidth The width of the plane viewport in pixels.
      * @property viewportHeight The height of the plane viewport in pixels.
      */
