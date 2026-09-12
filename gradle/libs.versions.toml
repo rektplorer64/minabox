@@ -1,25 +1,31 @@
 [versions]
-sdk-compile = "35"
-sdk-min = "21"
+# Compose 1.12 / androidx.core 1.18 / activity 1.13 require compiling against API 37.
+sdk-compile = "37"
+# Compose Multiplatform 1.12 requires at least API 23.
+sdk-min = "23"
 sdk-target = "35"
 
 # Must be updated along with compose-multiplatform
-compose-bom = "2025.01.00"
-compose-multiplatform = "1.7.3"
-activity-compose = "1.10.0"
-core-splashscreen = "1.0.1"
+compose-bom = "2026.08.00"
+compose-multiplatform = "1.12.0"
+activity-compose = "1.13.0"
+core-splashscreen = "1.2.0"
+# Frozen artifact - Compose Multiplatform 1.12 dropped material-icons-core from material3's
+# transitive dependencies and this module is no longer published above 1.7.3.
+compose-material-icons = "1.7.3"
 
-plugin-android-gradle = "8.8.1"
-plugin-kotlin = "2.1.10"
-plugin-detekt = "1.23.5"
-plugin-spotless = "6.5.1"
-plugin-mavenpublish = "0.25.3"
+plugin-android-gradle = "9.1.1"
+plugin-kotlin = "2.4.10"
+plugin-detekt = "1.23.8"
+plugin-spotless = "8.10.2"
+plugin-mavenpublish = "0.37.0"
 
 java-toolchain = "17"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "compose-material-icons" }
 compose-ui = { module = "androidx.compose.ui:ui" }
 compose-uitooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-uitoolingpreview = { module = "androidx.compose.ui:ui-tooling-preview" }
@@ -28,7 +34,7 @@ androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.re
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "plugin-android-gradle" }
-android-library = { id = "com.android.library", version.ref = "plugin-android-gradle" }
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "plugin-android-gradle" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "plugin-kotlin" }
 jetbrains-cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "plugin-kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }

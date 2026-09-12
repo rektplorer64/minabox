@@ -10,11 +10,17 @@ plugins {
 }
 
 kotlin {
-    androidTarget()
+    explicitApi()
+
+    // Use 'android' (or 'androidLibrary' on AGP 8.x) inside kotlin {}
+    android {
+        namespace = "eu.wewox.minabox"
+        compileSdk = libs.versions.sdk.compile.get().toInt()
+        minSdk = libs.versions.sdk.min.get().toInt()
+    }
 
     jvm()
 
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
@@ -24,38 +30,14 @@ kotlin {
         binaries.library()
     }
 
-    applyDefaultHierarchyTemplate()
-
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                api(compose.runtime)
-                api(compose.foundation)
-            }
+        commonMain.dependencies {
+            api(compose.runtime)
+            api(compose.foundation)
         }
 
         all {
             languageSettings.optIn("androidx.compose.foundation.ExperimentalFoundationApi")
-        }
-    }
-}
-
-android {
-    namespace = "eu.wewox.minabox"
-
-    compileSdk = libs.versions.sdk.compile.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.sdk.min.get().toInt()
-    }
-    buildFeatures {
-        compose = true
-    }
-    kotlin {
-        explicitApi()
-
-        androidTarget {
-            publishLibraryVariants("release", "debug")
         }
     }
 }
