@@ -3,22 +3,20 @@ package eu.wewox.minabox
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.annotation.FrequentlyChangingValue
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.roundToIntSize
+import androidx.compose.ui.util.fastMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -35,15 +33,13 @@ import kotlinx.coroutines.launch
     message = "Use rememberSaveableMinaBoxState() which uses rememberSaveable API.",
     replaceWith = ReplaceWith(
         "rememberSaveableMinaBoxState(initialOffset)",
-        "eu.wewox.minabox.rememberSaveableMinaBoxState"
-    )
+        "eu.wewox.minabox.rememberSaveableMinaBoxState",
+    ),
 )
 @Composable
 public fun rememberMinaBoxState(
-    initialOffset: MinaBoxPositionProvider.() -> Offset = { Offset.Zero }
-): MinaBoxState {
-    return remember { MinaBoxState(initialOffset) }
-}
+    initialOffset: MinaBoxPositionProvider.() -> Offset = { Offset.Zero },
+): MinaBoxState = remember { MinaBoxState(initialOffset) }
 
 /**
  * Creates a [MinaBoxState] that is remembered across compositions and saved across activity or process recreation.
@@ -54,12 +50,10 @@ public fun rememberMinaBoxState(
 @Composable
 public fun rememberSaveableMinaBoxState(
     initialOffset: MinaBoxPositionProvider.() -> Offset = { Offset.Zero },
-): MinaBoxState {
-    return rememberSaveable(
-        saver = MinaBoxState.Saver(),
-        init = { MinaBoxState(initialOffset) }
-    )
-}
+): MinaBoxState = rememberSaveable(
+    saver = MinaBoxState.Saver(),
+    init = { MinaBoxState(initialOffset) },
+)
 
 /**
  * A state object that can be hoisted to control and observe scrolling.
@@ -68,7 +62,7 @@ public fun rememberSaveableMinaBoxState(
  */
 @Stable
 public class MinaBoxState(
-    private val initialOffset: MinaBoxPositionProvider.() -> Offset
+    private val initialOffset: MinaBoxPositionProvider.() -> Offset,
 ) {
     internal lateinit var translateX: Animatable<Float, AnimationVector1D>
     internal lateinit var translateY: Animatable<Float, AnimationVector1D>
@@ -86,6 +80,28 @@ public class MinaBoxState(
      */
     public var translate: Translate? by mutableStateOf(null)
         private set
+
+    internal val layoutInfoState = mutableStateOf(EmptyMinaBoxMeasureResult, neverEqualPolicy())
+
+    /**
+     * The information about the current layout of the [MinaBox] associated with this state.
+     *
+     * It is refreshed during the measure pass of [MinaBox], so it describes the most recently measured state.
+     * Until the first measure pass completes it is empty, meaning [MinaBoxLayoutInfo.totalItemsCount] is zero,
+     * [MinaBoxLayoutInfo.visibleItemsInfo] is empty and the viewport size is [IntSize.Zero].
+     *
+     * The value changes on every scroll, so reading it directly during composition causes frequent recompositions. That
+     * is why it is annotated with [FrequentlyChangingValue] and why lint warns for such reads. Instead, consider:
+     * - [derivedStateOf] to recompose only when a derived value changes, for example when the first visible item
+     *   changes rather than on every pixel scrolled.
+     * - [snapshotFlow] to collect the changes as a flow, for example inside a [LaunchedEffect].
+     * - reading it from a measure, layout or draw block, which invalidates only that phase instead of causing a
+     *   recomposition.
+     *
+     * Reading it outside of composition, for example in a click handler, is not affected.
+     */
+    public val layoutInfo: MinaBoxLayoutInfo
+        @FrequentlyChangingValue get() = layoutInfoState.value
 
     /**
      * Updates bounds of the layout and initializes the position provider.
@@ -128,6 +144,41 @@ public class MinaBoxState(
         )
 
         updateTranslate(size)
+    }
+
+    internal fun updateVisibleItemInfo(
+        itemProvider: MinaBoxItemProvider,
+        viewportSize: Size,
+        visibleItems: Map<Int, Rect>,
+    ) {
+        val totalItemsCount = itemProvider.itemCount
+
+        val newViewportSize = viewportSize.roundToIntSize()
+        val visibleItemsInfo = visibleItems.keys.toList().fastMap { index ->
+            val key = itemProvider.getKey(index)
+            val rect = visibleItems[index]!!
+
+            MinaBoxItemInfoImpl(
+                index = index,
+                key = key,
+                offset = rect.topLeft,
+                size = rect.size,
+                contentType = itemProvider.getContentType(index),
+            )
+        }
+
+        val oldLayoutInfoState = layoutInfoState.value
+        if (
+            newViewportSize != oldLayoutInfoState.viewportSize
+            || visibleItemsInfo != oldLayoutInfoState.visibleItemsInfo
+            || totalItemsCount != oldLayoutInfoState.totalItemsCount
+        ) {
+            layoutInfoState.value = MinaBoxLayoutInfoImpl(
+                visibleItemsInfo = visibleItemsInfo,
+                totalItemsCount = totalItemsCount,
+                viewportSize = newViewportSize,
+            )
+        }
     }
 
     private fun updateTranslate(size: Size) {
@@ -294,7 +345,7 @@ public class MinaBoxState(
             paddingEnd = paddingEnd,
             paddingBottom = paddingBottom,
             currentX = translateX.value,
-            currentY = translateY.value
+            currentY = translateY.value,
         )
         snapTo(offset.x, offset.y)
     }
@@ -336,7 +387,13 @@ public class MinaBoxState(
                 MinaBoxState {
                     Offset(it[0], it[1])
                 }
-            }
+            },
         )
     }
 }
+
+private val EmptyMinaBoxMeasureResult = MinaBoxLayoutInfoImpl(
+    visibleItemsInfo = emptyList(),
+    totalItemsCount = 0,
+    viewportSize = IntSize.Zero,
+)

@@ -80,6 +80,12 @@ public fun MinaBox(
             size,
         )
 
+        state.updateVisibleItemInfo(
+            itemProvider = itemProvider,
+            viewportSize = size,
+            visibleItems = items,
+        )
+
         val placeables = items.map { (index, bounds) ->
             measure(
                 index,
