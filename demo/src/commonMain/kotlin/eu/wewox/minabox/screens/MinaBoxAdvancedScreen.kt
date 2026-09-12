@@ -38,21 +38,21 @@ import kotlin.math.sin
  */
 @Composable
 fun MinaBoxAdvancedScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopBar(
                 title = Example.MinaBoxAdvanced.label,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
             )
-        }
+        },
     ) { padding ->
-        val halfHeight = PolygonRadius * cos(PI / VerticesCount).toFloat()
+        val halfHeight = POLYGON_RADIUS * cos(PI / VERTICES_COUNT).toFloat()
 
         val itemSize = with(LocalDensity.current) {
             Size(
-                width = PolygonRadius.toPx() * 2f,
+                width = POLYGON_RADIUS.toPx() * 2f,
                 height = halfHeight.toPx() * 2f,
             )
         }
@@ -61,13 +61,13 @@ fun MinaBoxAdvancedScreen(
         val state = rememberSaveableMinaBoxState()
         MinaBox(
             state = state,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
         ) {
             items(
-                count = ColumnsCount * RowsCount,
+                count = COLUMNS_COUNT * ROWS_COUNT,
                 layoutInfo = {
-                    val column = it % ColumnsCount
-                    val row = it / ColumnsCount
+                    val column = it % COLUMNS_COUNT
+                    val row = it / COLUMNS_COUNT
                     val xOffset = itemSize.width * 0.75f
                     val yOffset = itemSize.height * 0.5f
                     MinaBoxItem(
@@ -76,14 +76,14 @@ fun MinaBoxAdvancedScreen(
                         width = itemSize.width,
                         height = itemSize.height,
                     )
-                }
+                },
             ) { index ->
                 Item(
                     onClick = {
                         scope.launch {
                             state.animateTo(index)
                         }
-                    }
+                    },
                 )
             }
         }
@@ -119,33 +119,32 @@ private fun Item(
             .clip(
                 GenericShape { size, _ ->
                     addPath(size.createPolygonPath())
-                }
+                },
             )
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
     )
 }
 
-private fun Size.createPolygonPath(): Path =
-    Path().apply {
-        val radius = width / 2f
+private fun Size.createPolygonPath(): Path = Path().apply {
+    val radius = width / 2f
 
-        fun lineTo(angle: Double) {
-            lineTo(
-                x = center.x + radius * cos(angle).toFloat(),
-                y = center.y + radius * sin(angle).toFloat(),
-            )
-        }
-
-        moveTo(0f, center.y)
-        lineTo(-2f * PI / 3f)
-        lineTo(-1f * PI / 3f)
-        lineTo(width, center.y)
-        lineTo(1f * PI / 3f)
-        lineTo(2f * PI / 3f)
-        close()
+    fun lineTo(angle: Double) {
+        lineTo(
+            x = center.x + radius * cos(angle).toFloat(),
+            y = center.y + radius * sin(angle).toFloat(),
+        )
     }
 
-private const val ColumnsCount = 50
-private const val RowsCount = 50
-private const val VerticesCount = 6
-private val PolygonRadius = 50.dp
+    moveTo(0f, center.y)
+    lineTo(-2f * PI / 3f)
+    lineTo(-1f * PI / 3f)
+    lineTo(width, center.y)
+    lineTo(1f * PI / 3f)
+    lineTo(2f * PI / 3f)
+    close()
+}
+
+private const val COLUMNS_COUNT = 50
+private const val ROWS_COUNT = 50
+private const val VERTICES_COUNT = 6
+private val POLYGON_RADIUS = 50.dp

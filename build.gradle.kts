@@ -22,7 +22,12 @@ configure(subprojects) {
     spotless {
         kotlin {
             target("**/*.kt")
-            ktlint("0.43.2")
+            ktlint("1.8.0").editorConfigOverride(
+                mapOf(
+                    // Compose convention: @Composable functions are PascalCase.
+                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                )
+            )
         }
     }
 }

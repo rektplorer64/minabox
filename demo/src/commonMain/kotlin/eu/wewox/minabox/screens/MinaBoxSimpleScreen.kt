@@ -26,36 +26,36 @@ fun MinaBoxSimpleScreen(
         topBar = {
             TopBar(
                 title = Example.MinaBoxSimple.label,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
             )
-        }
+        },
     ) { padding ->
-        val itemSizePx = with(LocalDensity.current) { ItemSize.toSize() }
+        val itemSizePx = with(LocalDensity.current) { ITEM_SIZE.toSize() }
         MinaBox(modifier = Modifier.padding(padding)) {
             items(
-                count = ColumnsCount * RowsCount,
+                count = COLUMNS_COUNT * ROWS_COUNT,
                 layoutInfo = {
-                    val column = it % ColumnsCount
-                    val row = it / ColumnsCount
+                    val column = it % COLUMNS_COUNT
+                    val row = it / COLUMNS_COUNT
                     MinaBoxItem(
                         x = itemSizePx.width * column,
                         y = itemSizePx.height * row,
                         width = itemSizePx.width,
                         height = itemSizePx.height,
                     )
-                }
+                },
             ) { index ->
                 Text(
                     text = "Index #$index",
                     modifier = Modifier
                         .border(1.dp, MaterialTheme.colorScheme.primary)
-                        .padding(8.dp)
+                        .padding(8.dp),
                 )
             }
         }
     }
 }
 
-private const val ColumnsCount = 50
-private const val RowsCount = 50
-private val ItemSize = DpSize(144.dp, 48.dp)
+private const val COLUMNS_COUNT = 50
+private const val ROWS_COUNT = 50
+private val ITEM_SIZE = DpSize(144.dp, 48.dp)

@@ -22,7 +22,7 @@ import eu.wewox.minabox.ui.theme.SpacingMedium
 @Composable
 internal fun RootScreen(onExampleClick: (Example) -> Unit) {
     Scaffold(
-        topBar = { TopBar("Mina Box Demo") }
+        topBar = { TopBar("Mina Box Demo") },
     ) { padding ->
         LazyColumn(Modifier.padding(padding)) {
             items(Example.entries) {
@@ -31,21 +31,21 @@ internal fun RootScreen(onExampleClick: (Example) -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onExampleClick(it) }
-                        .padding(SpacingMedium)
+                        .padding(SpacingMedium),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = it.label,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
                             text = it.description,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             }

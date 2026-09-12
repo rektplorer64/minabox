@@ -42,28 +42,28 @@ fun MinaBoxContentPaddingScreen(
                 onBackClick = onBackClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
             )
-        }
+        },
     ) { padding ->
         BoxWithConstraints {
-            val gapPx = LocalDensity.current.run { ItemsGap.roundToPx() }
+            val gapPx = LocalDensity.current.run { ITEMS_GAP.roundToPx() }
             val itemWidth = (constraints.maxWidth - gapPx * 3) / 2f
             val itemHeight = itemWidth * 2
 
             MinaBox(
                 scrollDirection = MinaBoxScrollDirection.VERTICAL,
                 contentPadding = PaddingValues(
-                    top = ItemsGap + padding.calculateTopPadding(),
-                    bottom = ItemsGap + padding.calculateBottomPadding(),
-                    start = ItemsGap,
-                    end = ItemsGap,
+                    top = ITEMS_GAP + padding.calculateTopPadding(),
+                    bottom = ITEMS_GAP + padding.calculateBottomPadding(),
+                    start = ITEMS_GAP,
+                    end = ITEMS_GAP,
                 ),
             ) {
                 items(
-                    count = ItemsCount,
+                    count = ITEMS_COUNT,
                     layoutInfo = { createLayoutInfo(it, gapPx, itemWidth, itemHeight) },
-                    itemContent = { ScaleUpItem(index = it) }
+                    itemContent = { ScaleUpItem(index = it) },
                 )
             }
         }
@@ -88,7 +88,7 @@ private fun createLayoutInfo(
         ((index / 2 - 1) * (itemHeight + gapPx) + itemHeight / 2f + gapPx).coerceAtLeast(0f)
     }
 
-    val height = if (index == 0 || index == ItemsCount - 1) {
+    val height = if (index == 0 || index == ITEMS_COUNT - 1) {
         itemHeight / 2f
     } else {
         itemHeight
@@ -115,7 +115,7 @@ private fun ScaleUpItem(index: Int, modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.primary,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 4.dp,
-        modifier = modifier.scale(scale.value)
+        modifier = modifier.scale(scale.value),
     ) {
         Box(Modifier.fillMaxSize()) {
             Text(
@@ -127,5 +127,5 @@ private fun ScaleUpItem(index: Int, modifier: Modifier = Modifier) {
     }
 }
 
-private val ItemsGap = 16.dp
-private const val ItemsCount = 50
+private val ITEMS_GAP = 16.dp
+private const val ITEMS_COUNT = 50
