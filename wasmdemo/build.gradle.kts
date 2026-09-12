@@ -10,26 +10,25 @@ plugins {
 kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "minabox-demo"
+        // Kotlin 2.4 removed the `moduleName` target property in favor of `outputModuleName`.
+        outputModuleName.set("minabox-demo")
         browser {
             commonWebpackConfig {
                 outputFileName = "main.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     port = 8080
-                    static = (static ?: mutableListOf()).apply {
-                        add(project.rootDir.path)
-                    }
+                    // The `static` list property is deprecated, use the `static(...)` function.
+                    static(project.rootDir.path)
                 }
             }
         }
         binaries.executable()
     }
+
     sourceSets {
-        val wasmJsMain by getting {
-            dependencies {
-                implementation(project(":demo"))
-                implementation(compose.ui)
-            }
+        wasmJsMain.dependencies {
+            implementation(project(":demo"))
+            implementation(compose.ui)
         }
     }
 }

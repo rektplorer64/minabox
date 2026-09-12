@@ -10,11 +10,16 @@ plugins {
 }
 
 kotlin {
-    androidTarget()
+    // With the AGP 9 KMP library plugin the Android target is configured inside `kotlin {}`.
+    android {
+        namespace = "eu.wewox.minabox.demo"
+        compileSdk = libs.versions.sdk.compile.get().toInt()
+        minSdk = libs.versions.sdk.min.get().toInt()
+    }
 
     jvm()
 
-    iosX64()
+    // Compose Multiplatform 1.12 no longer publishes `iosX64` artifacts.
     iosArm64()
     iosSimulatorArm64()
 
@@ -23,8 +28,6 @@ kotlin {
         browser()
         binaries.library()
     }
-
-    applyDefaultHierarchyTemplate()
 
     cocoapods {
         version = "1.0.0"
@@ -39,21 +42,15 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(project(":minabox"))
-                implementation(compose.material3)
-            }
+        commonMain.dependencies {
+            implementation(project(":minabox"))
+            implementation(compose.material3)
+            // Compose Multiplatform 1.12 no longer brings the Material icons in transitively.
+            implementation(libs.compose.material.icons.core)
         }
 
         all {
             languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
         }
     }
-}
-
-android {
-    namespace = "eu.wewox.minabox.demo"
-
-    compileSdk = libs.versions.sdk.compile.get().toInt()
 }

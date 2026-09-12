@@ -9,11 +9,9 @@ plugins {
 kotlin {
     jvm()
     sourceSets {
-        val jvmMain by getting {
-            dependencies {
-                implementation(project(":demo"))
-                implementation(compose.desktop.currentOs)
-            }
+        jvmMain.dependencies {
+            implementation(project(":demo"))
+            implementation(compose.desktop.currentOs)
         }
     }
 }

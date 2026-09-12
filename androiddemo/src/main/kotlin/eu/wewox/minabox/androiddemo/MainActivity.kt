@@ -1,4 +1,4 @@
-package eu.wewox.minabox
+package eu.wewox.minabox.androiddemo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,13 +10,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import eu.wewox.minabox.App
+import eu.wewox.minabox.Example
 
 /**
  * Main activity for demo application.
  * Contains simple "Crossfade" based navigation to various examples.
  */
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         enableEdgeToEdge()

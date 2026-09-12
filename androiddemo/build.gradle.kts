@@ -1,12 +1,15 @@
 plugins {
+    // Since AGP 9 the Kotlin Android plugin is built in, applying
+    // 'org.jetbrains.kotlin.android' explicitly is an error.
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.compose.compiler)
     id("convention.jvm.toolchain")
 }
 
 android {
-    namespace = "eu.wewox.minabox"
+    // The namespace must be unique across all modules since AGP 9 - `:minabox` already uses
+    // `eu.wewox.minabox`. The application id stays `eu.wewox.minabox`.
+    namespace = "eu.wewox.minabox.androiddemo"
 
     compileSdk = libs.versions.sdk.compile.get().toInt()
 

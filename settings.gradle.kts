@@ -18,7 +18,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MinaBox"
+rootProject.name = "minabox-compose"
 include(":demo")
 include(":minabox")
 include(":desktopdemo")
