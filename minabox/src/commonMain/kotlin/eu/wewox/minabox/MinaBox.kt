@@ -53,6 +53,7 @@ public fun MinaBox(
     val contentPaddingPx = contentPadding.toPx()
 
     val itemProvider = rememberItemProvider(content)
+    state.itemProvider = itemProvider
 
     var positionProvider by remember { mutableStateOf<MinaBoxPositionProviderImpl?>(null) }
 

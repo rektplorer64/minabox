@@ -56,6 +56,24 @@ internal class MinaBoxItemProvider(
     override val itemCount: Int =
         intervals.size
 
+    /**
+     * Returns the layout information of the item with the given global [index], resolved from the factory which was
+     * registered with [MinaBoxScope.items].
+     */
+    fun getLayoutInfo(index: Int): MinaBoxItem =
+        withLocalIntervalIndex(index) { localIndex, content ->
+            content.layoutInfo(localIndex)
+        }
+
+    /**
+     * Returns the metadata of the item with the given global [index], or `null` when no metadata factory was registered
+     * for it.
+     */
+    fun getMetadata(index: Int): Any? =
+        withLocalIntervalIndex(index) { localIndex, content ->
+            content.metadata?.invoke(localIndex)
+        }
+
     override fun getContentType(index: Int): Any? =
         withLocalIntervalIndex(index) { localIndex, content ->
             content.contentType.invoke(localIndex)
@@ -74,8 +92,7 @@ internal class MinaBoxItemProvider(
     }
 
     /**
-     * Filters only visible items.
-     * Returns a map of item indices with its position and size.
+     * Filters only visible items. Returns a map of item indices with its position and size.
      *
      * @param translateX The current translation along X axis.
      * @param translateY The current translation along Y axis.

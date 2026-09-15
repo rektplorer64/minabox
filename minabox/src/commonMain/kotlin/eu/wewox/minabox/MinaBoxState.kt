@@ -3,18 +3,11 @@ package eu.wewox.minabox
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.annotation.FrequentlyChangingValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.neverEqualPolicy
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -73,6 +66,8 @@ public class MinaBoxState(
 ) {
     internal lateinit var translateX: Animatable<Float, AnimationVector1D>
     internal lateinit var translateY: Animatable<Float, AnimationVector1D>
+
+    internal lateinit var itemProvider: MinaBoxItemProvider
 
     private val isRtl: Boolean
         get() = positionProvider.layoutDirection == LayoutDirection.Rtl
@@ -171,6 +166,7 @@ public class MinaBoxState(
                 key = key,
                 offset = rect.topLeft,
                 size = rect.size,
+                metadata = itemProvider.getMetadata(index),
                 contentType = itemProvider.getContentType(index),
             )
         }
@@ -357,6 +353,35 @@ public class MinaBoxState(
         )
         snapTo(offset.x, offset.y)
     }
+
+    /**
+     * Returns the layout information of the item with the given [index].
+     *
+     * Unlike [layoutInfo], which only describes the items which are currently visible, this resolves the item with the
+     * factories registered with [MinaBoxScope.items], so it works for any index, including the ones which are currently
+     * outside the viewport.
+     *
+     * It can be called only after the [MinaBox] associated with this state has been composed at least once.
+     *
+     * @param index The global index of the item.
+     * @return The layout information of the item.
+     * @throws IndexOutOfBoundsException When the [index] is not a valid item index.
+     */
+    public fun getLayoutInfo(index: Int): MinaBoxItem = itemProvider.getLayoutInfo(index)
+
+    /**
+     * Returns the metadata of the item with the given [index].
+     *
+     * The metadata is the additional information provided with the `metadata` factory of [MinaBoxScope.items]. It is
+     * opaque to the layout and is never read while resolving the lazy layout, so it does not affect [layoutInfo].
+     *
+     * It can be called only after the [MinaBox] associated with this state has been composed at least once.
+     *
+     * @param index The global index of the item.
+     * @return The metadata of the item, or `null` when it has none.
+     * @throws IndexOutOfBoundsException When the [index] is not a valid item index.
+     */
+    public fun getMetadata(index: Int): Any? = itemProvider.getMetadata(index)
 
     /**
      * Represents the offset on the plane.

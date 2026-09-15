@@ -8,5 +8,6 @@ internal data class MinaBoxItemInfoImpl(
     override val key: Any,
     override val offset: Offset,
     override val size: Size,
+    override val metadata: Any?,
     override val contentType: Any?,
 ) : MinaBoxItemInfo
