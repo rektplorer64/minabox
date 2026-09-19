@@ -3,7 +3,7 @@ package eu.wewox.minabox
 import androidx.compose.foundation.lazy.layout.IntervalList
 import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.foundation.lazy.layout.getDefaultLazyLayoutKey
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import kotlin.math.max
@@ -11,17 +11,26 @@ import kotlin.math.max
 /**
  * Remembers the item provider.
  *
+ * The [content] block is applied through [rememberUpdatedState], so the registered intervals always describe the latest
+ * content without the content lambda itself having to be stable. The intervals and the [MinaBoxItemProvider] built from
+ * them are each held in a [derivedStateOf] with a [referentialEqualityPolicy], so they are recomputed only when the
+ * registered content actually changes rather than on every composition. The provider is read in the composable body so
+ * that the read is observed and the caller is recomposed when the content changes.
+ *
  * @param content The lambda block which describes the content.
  * @return An instance of the [MinaBoxItemProvider].
  */
 @Composable
-internal fun rememberItemProvider(
-    content: MinaBoxScope.() -> Unit
-): MinaBoxItemProvider =
-    run {
-        val scope = MinaBoxScopeImpl().apply(content)
-        MinaBoxItemProvider(scope.intervals)
+internal fun rememberItemProvider(content: MinaBoxScope.() -> Unit): MinaBoxItemProvider {
+    val latestContent = rememberUpdatedState(content)
+    val itemProvider = remember {
+        val intervalContentState = derivedStateOf(referentialEqualityPolicy()) {
+            MinaBoxScopeImpl().apply(latestContent.value).intervals
+        }
+        derivedStateOf(referentialEqualityPolicy()) { MinaBoxItemProvider(intervalContentState.value) }
     }
+    return itemProvider.value
+}
 
 /**
  * Implementation of the [LazyLayoutItemProvider]
